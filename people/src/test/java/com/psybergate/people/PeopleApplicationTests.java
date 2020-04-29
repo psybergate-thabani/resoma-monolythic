@@ -1,13 +1,13 @@
-package com.psybergate;
+package com.psybergate.people;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ResomaApplicationTests {
+class PeopleApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }
