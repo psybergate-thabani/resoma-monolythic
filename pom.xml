@@ -23,7 +23,7 @@
     <modules>
         <module>main</module>
         <module>people</module>
-        <module>project</module>
+        <module>projects</module>
     </modules>
 
     <dependencies>

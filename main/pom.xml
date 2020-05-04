@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>com.psybergate</groupId>
-            <artifactId>project</artifactId>
+            <artifactId>projects</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
