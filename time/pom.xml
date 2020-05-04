@@ -8,13 +8,14 @@
         <groupId>com.psybergate</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>projects</artifactId>
+    <artifactId>time</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>projects</name>
-    <description>Projects Module For Psybergate Resource Management System</description>
+    <name>time</name>
+    <description>Time Module For Psybergate Resource Management System</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
+
 
 </project>
