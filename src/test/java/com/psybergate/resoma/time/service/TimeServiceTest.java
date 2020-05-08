@@ -39,19 +39,19 @@ class TimeServiceTest {
 
     @BeforeEach
     void init() {
-        Set<Employee> team = new HashSet<>();
-        team.add(new Employee("emp1", "John", "Doe", "JohnD@resoma.com", "78 Home Address, Johannesburg",
-                "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active"));
-        Project project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, team, ProjectType.BILLABLE);
-        project.generate();
         Employee employee = new Employee("emp1", "John", "Doe", "JohnD@resoma.com", "78 Home Address, Johannesburg",
                 "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active");
         employee.generateId();
+        Set<Employee> team = new HashSet<>();
+        team.add(employee);
+        Project project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, team, ProjectType.BILLABLE);
+        project.generate();
+
         Task task = new Task("task1", "Analysis", project, false);
         timeService = new TimeServiceImpl(mockTimeEntryRepository, mockStatusHistoryRepository);
-        testTimeEntry = new TimeEntry(employee, project, task, "descr1", 100, LocalDate.now(), false);
-        testTimeEntry2 = new TimeEntry(employee, project, task, "descr2", 100, LocalDate.now(), false);
-        testTimeEntry3 = new TimeEntry(employee, project, task, "descr3", 200, LocalDate.now(), false);
+        testTimeEntry = new TimeEntry(employee, task, "descr1", 100, LocalDate.now(), false);
+        testTimeEntry2 = new TimeEntry(employee, task, "descr2", 100, LocalDate.now(), false);
+        testTimeEntry3 = new TimeEntry(employee, task, "descr3", 200, LocalDate.now(), false);
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.psybergate.resoma.time.entity;
 
 import com.psybergate.resoma.people.entity.Employee;
-import com.psybergate.resoma.projects.entity.Project;
 import com.psybergate.resoma.projects.entity.Task;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +8,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
@@ -25,10 +23,6 @@ public class TimeEntry extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
-
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
 
     @NotNull(message = "Task is mandatory")
     @ManyToOne
@@ -56,9 +50,8 @@ public class TimeEntry extends BaseEntity {
     public TimeEntry() {
     }
 
-    public TimeEntry(Employee employee, Project project, Task task, String description, int period, LocalDate date, boolean deleted) {
+    public TimeEntry(Employee employee, Task task, String description, int period, LocalDate date, boolean deleted) {
         this.employee = employee;
-        this.project = project;
         this.task = task;
         this.description = description;
         this.period = period;
