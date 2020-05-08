@@ -3,6 +3,7 @@ package com.psybergate.resoma.projects.service;
 import com.psybergate.resoma.people.entity.Employee;
 import com.psybergate.resoma.projects.entity.Project;
 import com.psybergate.resoma.projects.entity.ProjectType;
+import com.psybergate.resoma.projects.entity.Task;
 import com.psybergate.resoma.projects.repository.ProjectRepository;
 import com.psybergate.resoma.projects.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,26 +99,104 @@ class ProjectServiceTest {
     }
 
     @Test
-    void addPersonToProject() {
+    void shouldAddEmployeeToProject_whenPersonIsAddedToProject() {
+        //Arrange
+        UUID id = project.getId();
+        when(projectRepository.findByIdAndDeleted(id,false)).thenReturn(project);
+        when(projectRepository.save(project)).thenReturn(project);
+
+        //Act
+        projectService.addPersonToProject("emp1", id);
+
+        //Assert
+        verify(projectRepository, times(1)).findByIdAndDeleted(id,false);
+        verify(projectRepository, times(1)).save(project);
     }
 
     @Test
-    void deleteProject() {
+    void shouldDeleteProject_whenProjectIsDeleted() {
+        //Arrange
+        UUID id = project.getId();
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
+        when(projectRepository.save(project)).thenReturn(project);
+        Task task = new Task("task1", "First Task", project, false);
+        when(taskRepository.findAllByProjectAndDeleted(project, false))
+                .thenReturn(Collections.singletonList(task));
+
+        //Act
+        projectService.deleteProject(id);
+
+        //Assert
+        verify(projectRepository, times(1)).save(project);
+        verify(taskRepository, times(1)).findAllByProjectAndDeleted(project, false);
+        verify(taskRepository, times(1)).save(any(Task.class));
+
     }
 
     @Test
-    void addTaskToProject() {
+    void shouldAddTaskToProject_whenTaskIsAddedToProject() {
+        //Arrange
+        Task task = new Task("task1", "First Task", project, false);
+        UUID id = project.getId();
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
+        when(taskRepository.save(task)).thenReturn(task);
+
+        //Act
+        Task resultTask = projectService.addTaskToProject(task, id);
+
+        //Assert
+        assertNotNull(resultTask);
+        assertEquals(task, resultTask);
+        verify(projectRepository, times(1)).findByIdAndDeleted(id, false);
+        verify(taskRepository, times(1)).save(task);
+
     }
 
     @Test
-    void retrieveTasks() {
+    void shouldRetrieveTasks_whenTasksAreRetrieved() {
+        //Arrange
+        Task task = new Task("task1", "First Task", project, false);
+        when(taskRepository.findAllByProjectAndDeleted(project, false))
+                .thenReturn(Collections.singletonList(task));
+
+        //Act
+        List<Task> resultTasks = projectService.retrieveTasks(project);
+
+        //Assert
+        assertNotNull(resultTasks);
+        assertEquals(1, resultTasks.size());
     }
 
     @Test
-    void deleteTaskByProject() {
+    void shouldDeleteTaskByProject_whenTaskIsDeletedByProject() {
+        //Arrange
+        Task task = new Task("task1", "First Task", project, false);
+
+        when(taskRepository.findAllByProjectAndDeleted(project, false))
+                .thenReturn(Collections.singletonList(task));
+        when(taskRepository.save(task)).thenReturn(task);
+
+        //Act
+        projectService.deleteTaskByProject(project);
+
+        //Assert
+        verify(taskRepository, times(1)).findAllByProjectAndDeleted(project, false);
+        verify(taskRepository, times(1)).save(task);
     }
 
     @Test
-    void deleteTask() {
+    void shouldDeleteTask_whenTaskIsDeleted() {
+        //Arrange
+        Task task = new Task("task1", "First Task", project, false);
+        UUID id = task.getId();
+        when(taskRepository.getOne(id)).thenReturn(task);
+        when(taskRepository.save(task)).thenReturn(task);
+
+        //Act
+        projectService.deleteTask(id);
+
+        //Assert
+        verify(taskRepository, times(1)).getOne(id);
+        verify(taskRepository, times(1)).save(task);
     }
 }
