@@ -9,6 +9,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 
 @Getter
@@ -18,6 +21,7 @@ import java.time.LocalDate;
 @Entity(name = "TimeEntry")
 public class TimeEntry extends BaseEntity {
 
+    @NotNull(message = "Employee is mandatory")
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
@@ -26,6 +30,7 @@ public class TimeEntry extends BaseEntity {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @NotNull(message = "Task is mandatory")
     @ManyToOne
     @JoinColumn(name = "task_id")
     private Task task;
@@ -40,9 +45,11 @@ public class TimeEntry extends BaseEntity {
     @Column(name = "description")
     private String description;
 
+    @Positive(message = "Period must be greater than zero")
     @Column(name = "period", nullable = false)
     private int period;
 
+    @NotNull(message = "Date is mandatory")
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
