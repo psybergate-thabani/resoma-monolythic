@@ -1,7 +1,5 @@
 package com.psybergate.resoma.projects.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.psybergate.resoma.projects.util.Exclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -19,14 +19,14 @@ import javax.persistence.ManyToOne;
 @Entity(name = "task")
 public class Task extends BaseEntity {
 
+    @NotBlank(message = "Task code is mandatory")
     @Column(name = "code", nullable = false, unique = true)
     private String code;
 
+    @NotNull(message = "Task name is mandatory")
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Exclude
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
