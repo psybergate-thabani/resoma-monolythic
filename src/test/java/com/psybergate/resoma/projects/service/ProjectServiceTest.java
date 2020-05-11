@@ -35,7 +35,7 @@ class ProjectServiceTest {
         projectService = new ProjectServiceImpl(projectRepository, taskRepository);
         team.add(new Employee("emp1", "John", "Doe", "JohnD@resoma.com", "78 Home Address, Johannesburg",
                 "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active"));
-        project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, team, ProjectType.BILLABLE);
+        project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
         project.generate();
     }
 
@@ -69,9 +69,9 @@ class ProjectServiceTest {
     @Test
     void shouldReturnListOfProjects_whenProjectsAreRetrieved() {
         //Arrange
-        Project projectA = new Project("projA", "First Project", "client1", LocalDate.now(), null, team, ProjectType.BILLABLE);
-        Project projectB = new Project("projB", "Second Project", "client1", LocalDate.now(), null, team, ProjectType.BILLABLE);
-        Project projectC = new Project("projC", "Third Project", "client1", LocalDate.now(), null, team, ProjectType.BILLABLE);
+        Project projectA = new Project("projA", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
+        Project projectB = new Project("projB", "Second Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
+        Project projectC = new Project("projC", "Third Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
         List<Project> projects = Arrays.asList(projectA, projectB, projectC);
         when(projectRepository.findAllByDeleted(false)).thenReturn(projects);
 

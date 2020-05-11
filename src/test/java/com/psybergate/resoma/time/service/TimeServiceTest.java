@@ -44,7 +44,7 @@ class TimeServiceTest {
         employee.generateId();
         Set<Employee> team = new HashSet<>();
         team.add(employee);
-        Project project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, team, ProjectType.BILLABLE);
+        Project project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
         project.generate();
 
         Task task = new Task("task1", "Analysis", project, false);

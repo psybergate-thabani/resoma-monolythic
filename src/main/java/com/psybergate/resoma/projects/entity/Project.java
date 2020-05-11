@@ -38,12 +38,8 @@ public class Project extends BaseEntity {
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
 
-    @ManyToMany
-    @JoinTable(
-            name = "project_team",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "employee_id"))
-    private Set<Employee> team = new HashSet<>();
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Allocation> allocations = new HashSet<>();
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -52,13 +48,12 @@ public class Project extends BaseEntity {
     public Project() {
     }
 
-    public Project(String code, String name, String clientCode, LocalDate startDate, LocalDate endDate, Set<Employee> team, ProjectType type) {
+    public Project(String code, String name, String clientCode, LocalDate startDate, LocalDate endDate, ProjectType type) {
         this.code = code;
         this.name = name;
         this.clientCode = clientCode;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.team = team;
         this.type = type;
     }
 
