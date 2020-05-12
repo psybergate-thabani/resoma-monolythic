@@ -1,4 +1,4 @@
-package com.psybergate.resoma.people.config;
+package com.psybergate.resoma.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;

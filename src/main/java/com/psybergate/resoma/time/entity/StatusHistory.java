@@ -7,12 +7,13 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(of = {"status", "statusUpdatedBy", "statusReason","timeStamp"})
+@EqualsAndHashCode(of = {"status", "statusReason", "timeStamp"}, callSuper = false)
 @Entity(name = "StatusHistory")
 public class StatusHistory extends BaseEntity {
 
@@ -38,5 +39,7 @@ public class StatusHistory extends BaseEntity {
         this.statusReason = timeEntry.getStatusReason();
         this.timeEntry = timeEntry;
         this.timeStamp = LocalDateTime.now();
+        super.setId(UUID.randomUUID());
+        super.setCreatedDate(LocalDateTime.now());
     }
 }

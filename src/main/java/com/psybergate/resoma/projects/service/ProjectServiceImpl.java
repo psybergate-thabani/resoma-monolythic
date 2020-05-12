@@ -100,4 +100,9 @@ public class ProjectServiceImpl implements ProjectService {
         taskRepository.save(task);
     }
 
+    @Override
+    public Task retrieveTask(UUID taskId) {
+        return taskRepository.findByIdAndDeleted(taskId, false);
+    }
+
 }

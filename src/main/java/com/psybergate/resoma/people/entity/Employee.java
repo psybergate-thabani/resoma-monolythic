@@ -11,9 +11,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(of = "employeeCode")
+@EqualsAndHashCode(of = "employeeCode", callSuper = false)
 @Entity(name = "Employee")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Employee extends BaseEntity {
@@ -72,5 +73,7 @@ public class Employee extends BaseEntity {
         this.occupation = occupation;
         this.status = status;
         this.setCreatedDate(createDate);
+        super.setId(UUID.randomUUID());
+        super.setCreatedDate(LocalDateTime.now());
     }
 }

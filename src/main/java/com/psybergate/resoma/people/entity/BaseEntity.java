@@ -1,7 +1,6 @@
 package com.psybergate.resoma.people.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -12,7 +11,10 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @EqualsAndHashCode(of = "id")
 @MappedSuperclass
@@ -45,11 +47,9 @@ public abstract class BaseEntity {
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
 
-    public BaseEntity() {
-    }
-
     @PrePersist
-    public void generateId() {
+    protected void prePersist() {
         this.id = UUID.randomUUID();
+        this.createdDate = LocalDateTime.now();
     }
 }

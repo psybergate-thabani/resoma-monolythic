@@ -11,10 +11,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = "code")
+@EqualsAndHashCode(of = "code", callSuper = false)
 @ToString(callSuper = true)
 @Entity(name = "task")
 public class Task extends BaseEntity {
@@ -27,6 +29,7 @@ public class Task extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @NotNull(message = "Project is mandatory")
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
@@ -39,5 +42,7 @@ public class Task extends BaseEntity {
         this.name = name;
         this.project = project;
         this.setDeleted(deleted);
+        super.setId(UUID.randomUUID());
+        super.setCreatedDate(LocalDateTime.now());
     }
 }

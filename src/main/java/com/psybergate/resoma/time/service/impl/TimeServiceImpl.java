@@ -54,7 +54,8 @@ public class TimeServiceImpl implements TimeService {
     @Override
     @Transactional
     public TimeEntry updateEntry(TimeEntry timeEntry) {
-        if (timeEntry.isApproved()) throw new ValidationException("Status can not be APPROVED");
+        if (timeEntry.isApproved())
+            throw new ValidationException("Status can not be APPROVED");
         timeEntry.setStatus(Status.NEW);
         return timeEntryRepository.save(timeEntry);
     }
@@ -125,7 +126,8 @@ public class TimeServiceImpl implements TimeService {
     }
 
     private void deleteEntry(TimeEntry timeEntry) {
-        if (Status.APPROVED.equals(timeEntry.getStatus())) throw new ValidationException("Status can not be APPROVED");
+        if (Status.APPROVED.equals(timeEntry.getStatus()))
+            throw new ValidationException("Status can not be APPROVED");
         timeEntry.setDeleted(true);
         timeEntryRepository.save(timeEntry);
     }

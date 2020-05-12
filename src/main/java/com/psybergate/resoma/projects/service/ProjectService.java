@@ -28,4 +28,6 @@ public interface ProjectService {
     void deleteTaskByProject(Project project);
 
     void deleteTask(UUID taskId);
+
+    Task retrieveTask(UUID taskId);
 }

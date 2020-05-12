@@ -11,7 +11,7 @@ import javax.persistence.*;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"employee", "project"})
+@EqualsAndHashCode(of = {"employee", "project"}, callSuper = false)
 @Entity
 @Table(name = "allocation")
 public class Allocation extends BaseEntity {

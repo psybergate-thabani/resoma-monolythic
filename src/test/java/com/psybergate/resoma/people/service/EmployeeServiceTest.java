@@ -30,7 +30,6 @@ class EmployeeServiceTest {
         employeeService = new EmployeeServiceImpl(employeeRepository);
         employee = new Employee("emp1", "John", "Doe", "JohnD@resoma.com", "78 Home Address, Johannesburg",
                 "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active");
-        employee.generateId();
     }
 
     @Test

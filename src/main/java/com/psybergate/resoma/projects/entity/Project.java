@@ -3,18 +3,18 @@ package com.psybergate.resoma.projects.entity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = "code")
-@ToString(callSuper = true, exclude = "tasks")
+@EqualsAndHashCode(of = "code", callSuper = false)
 @Entity(name = "project")
 public class Project extends BaseEntity {
 
@@ -33,7 +33,7 @@ public class Project extends BaseEntity {
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = true)
+    @Column(name = "end_date")
     private LocalDate endDate;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -53,6 +53,8 @@ public class Project extends BaseEntity {
         this.startDate = startDate;
         this.endDate = endDate;
         this.type = type;
+        super.setId(UUID.randomUUID());
+        super.setCreatedDate(LocalDateTime.now());
     }
 
 }

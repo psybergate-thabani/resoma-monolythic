@@ -36,7 +36,6 @@ class ProjectServiceTest {
         team.add(new Employee("emp1", "John", "Doe", "JohnD@resoma.com", "78 Home Address, Johannesburg",
                 "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active"));
         project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
-        project.generate();
     }
 
     @Test
@@ -198,5 +197,21 @@ class ProjectServiceTest {
         //Assert
         verify(taskRepository, times(1)).getOne(id);
         verify(taskRepository, times(1)).save(task);
+    }
+
+    @Test
+    void shouldReturnTask_whenTaskIsRetrievedById() {
+        //Arrange
+        Task task = new Task("task1", "First Task", project, false);
+        UUID taskId = task.getId();
+        when(taskRepository.findByIdAndDeleted(taskId,false)).thenReturn(task);
+
+        //Act
+        Task resultTask = projectService.retrieveTask(taskId);
+
+        //Assert
+        assertNotNull(resultTask);
+        assertEquals(task, resultTask);
+        verify(taskRepository, times(1)).findByIdAndDeleted(taskId,false);
     }
 }

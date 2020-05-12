@@ -11,11 +11,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @ToString(callSuper = true)
-@EqualsAndHashCode(of = {"employee", "project", "task", "date"})
+@EqualsAndHashCode(callSuper = false, of = {"employee", "task", "date"})
 @Entity(name = "TimeEntry")
 public class TimeEntry extends BaseEntity {
 
@@ -58,7 +60,8 @@ public class TimeEntry extends BaseEntity {
         this.date = date;
         this.status = Status.NEW;
         this.setDeleted(deleted);
-        super.generate();
+        super.setId(UUID.randomUUID());
+        super.setCreatedDate(LocalDateTime.now());
     }
 
     public boolean isApproved() {
