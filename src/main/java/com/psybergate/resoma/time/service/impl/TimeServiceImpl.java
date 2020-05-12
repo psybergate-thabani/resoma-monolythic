@@ -83,7 +83,7 @@ public class TimeServiceImpl implements TimeService {
     @Transactional
     public TimeEntry approveEntry(TimeEntry timeEntry) {
         if (!EnumSet.of(Status.SUBMITTED).contains(timeEntry.getStatus()))
-            throw new ValidationException("Status can only be PENDING");
+            throw new ValidationException("Status can only be SUBMITTED");
         timeEntry.setStatus(Status.APPROVED);
         timeEntry = timeEntryRepository.save(timeEntry);
         saveStatusHistory(timeEntry);
@@ -94,7 +94,7 @@ public class TimeServiceImpl implements TimeService {
     @Transactional
     public TimeEntry rejectEntry(TimeEntry timeEntry) {
         if (!EnumSet.of(Status.SUBMITTED).contains(timeEntry.getStatus()))
-            throw new ValidationException("Status can only be PENDING");
+            throw new ValidationException("Status can only be SUBMITTED");
         timeEntry.setStatus(Status.REJECTED);
         timeEntry = timeEntryRepository.save(timeEntry);
         saveStatusHistory(timeEntry);

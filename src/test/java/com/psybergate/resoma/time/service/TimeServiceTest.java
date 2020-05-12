@@ -16,12 +16,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -92,6 +92,16 @@ class TimeServiceTest {
     }
 
     @Test
+    void shouldThrowValidationException_whenUpdatingApprovedEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.APPROVED);
+
+        //Act
+        //Assert
+        assertThrows(ValidationException.class, () -> timeService.updateEntry(testTimeEntry));
+    }
+
+    @Test
     void shouldDeleteTimeEntry_whenDeletingEntry() {
         //Arrange
         UUID id = testTimeEntry.getId();
@@ -102,6 +112,19 @@ class TimeServiceTest {
 
         //Assert
         verify(mockTimeEntryRepository).save(testTimeEntry);
+    }
+
+    @Test
+    void shouldThrowValidationException_whenDeletingApprovedEntry() {
+        //Arrange
+        UUID id = testTimeEntry.getId();
+        when(mockTimeEntryRepository.findByIdAndDeleted(id, false)).thenReturn(testTimeEntry);
+
+        //Act
+        testTimeEntry.setStatus(Status.APPROVED);
+
+        //Assert
+        assertThrows(ValidationException.class, () -> timeService.deleteEntry(testTimeEntry.getId()));
     }
 
     @Test
@@ -118,6 +141,14 @@ class TimeServiceTest {
         assertEquals(Status.SUBMITTED, testTimeEntry.getStatus());
     }
 
+    @Test
+    void shouldThrowValidationException_whenSubmittingApprovedEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.APPROVED);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> timeService.submitEntry(testTimeEntry));
+    }
 
     @Test
     void shouldApproveTimeEntry_whenApprovingEntry() {
@@ -135,6 +166,33 @@ class TimeServiceTest {
     }
 
     @Test
+    void shouldThrowValidationException_whenApprovingNewEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.NEW);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry));
+    }
+
+    @Test
+    void shouldThrowValidationException_whenApprovingApprovedEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.APPROVED);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry));
+    }
+
+    @Test
+    void shouldThrowValidationException_whenApprovingRejectedEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.REJECTED);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry));
+    }
+
+    @Test
     void shouldRejectTimeEntry_whenRejectingEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.SUBMITTED);
@@ -148,6 +206,33 @@ class TimeServiceTest {
         verify(mockTimeEntryRepository).save(testTimeEntry);
         verify(mockStatusHistoryRepository).save(any(StatusHistory.class));
         assertEquals(testTimeEntry.getStatus(), Status.REJECTED);
+    }
+
+    @Test
+    void shouldThrowValidationException_whenRejectingNewEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.NEW);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry));
+    }
+
+    @Test
+    void shouldThrowValidationException_whenRejectingApprovedEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.APPROVED);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry));
+    }
+
+    @Test
+    void shouldThrowValidationException_whenRejectingRejectedEntry() {
+        //Arrange
+        testTimeEntry.setStatus(Status.REJECTED);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry));
     }
 
     @Test
@@ -195,7 +280,6 @@ class TimeServiceTest {
         List<TimeEntry> approveEntries = timeService.approveEntries(timeEntries);
 
         //Verify
-
         verify(mockTimeEntryRepository, times(3)).save(any());
         verify(mockStatusHistoryRepository, times(3)).save(any(StatusHistory.class));
         approveEntries.forEach((t) -> assertEquals(Status.APPROVED, t.getStatus()));
