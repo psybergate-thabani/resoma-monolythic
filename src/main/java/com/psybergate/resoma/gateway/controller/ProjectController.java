@@ -1,4 +1,4 @@
-package com.psybergate.resoma.projects.controller;
+package com.psybergate.resoma.gateway.controller;
 
 import com.psybergate.resoma.projects.dto.AllocationDTO;
 import com.psybergate.resoma.projects.entity.Project;

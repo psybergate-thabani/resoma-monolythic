@@ -1,4 +1,4 @@
-package com.psybergate.resoma.time.controller;
+package com.psybergate.resoma.gateway.controller;
 
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.service.TimeService;

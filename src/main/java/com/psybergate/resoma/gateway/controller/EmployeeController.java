@@ -1,4 +1,4 @@
-package com.psybergate.resoma.people.controller;
+package com.psybergate.resoma.gateway.controller;
 
 import com.psybergate.resoma.people.entity.Employee;
 import com.psybergate.resoma.people.service.EmployeeService;
