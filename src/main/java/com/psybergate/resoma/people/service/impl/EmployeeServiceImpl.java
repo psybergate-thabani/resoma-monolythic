@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,13 +18,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeRepository employeeRepository;
 
     @Autowired
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository) {
+    public EmployeeServiceImpl(@Valid EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
 
     @Override
     @Transactional
-    public Employee createEmployee(Employee employee) {
+    public Employee createEmployee(@Valid Employee employee) {
         return employeeRepository.save(employee);
     }
 
@@ -39,7 +40,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public Employee updateEmployee(Employee employee) {
+    public Employee updateEmployee(@Valid Employee employee) {
         return employeeRepository.save(employee);
     }
 

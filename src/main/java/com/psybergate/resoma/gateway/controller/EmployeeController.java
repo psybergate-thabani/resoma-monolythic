@@ -3,17 +3,12 @@ package com.psybergate.resoma.gateway.controller;
 import com.psybergate.resoma.people.entity.Employee;
 import com.psybergate.resoma.people.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.ValidationException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RequestMapping(path = "api/people")
@@ -23,18 +18,6 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
-    }
     @PostMapping("v1/employees")
     public ResponseEntity<Employee> captureEmployee(@RequestBody @Valid Employee employee) {
         return ResponseEntity.ok(employeeService.createEmployee(employee));

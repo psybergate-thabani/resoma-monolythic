@@ -21,12 +21,12 @@ import java.util.UUID;
 @Entity(name = "TimeEntry")
 public class TimeEntry extends BaseEntity {
 
-    @NotNull(message = "Employee is mandatory")
+    @NotNull(message = "{employee.notnull}")
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @NotNull(message = "Task is mandatory")
+    @NotNull(message = "{task.notnull}")
     @ManyToOne
     @JoinColumn(name = "task_id")
     private Task task;
@@ -41,11 +41,11 @@ public class TimeEntry extends BaseEntity {
     @Column(name = "description")
     private String description;
 
-    @Positive(message = "Period must be greater than zero")
+    @Positive(message = "{period.positive}")
     @Column(name = "period", nullable = false)
     private int period;
 
-    @NotNull(message = "Date is mandatory")
+    @NotNull(message = "{date.notnull}")
     @Column(name = "date", nullable = false)
     private LocalDate date;
 

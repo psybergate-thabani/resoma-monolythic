@@ -19,39 +19,39 @@ import java.util.UUID;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Employee extends BaseEntity {
 
-    @NotBlank(message = "Employee code is mandatory")
+    @NotBlank(message = "{employeecode.notblank}")
     @Column(name = "employee_code", nullable = false, unique = true)
     private String employeeCode;
 
-    @NotBlank(message = "Full name is mandatory")
+    @NotBlank(message = "{fullname.notblank}")
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @NotBlank(message = "Last name is mandatory")
+    @NotBlank(message = "{lastname.notblank}")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @NotBlank(message = "Email is mandatory")
-    @Email(message = "Email is not valid")
+    @NotBlank(message = "{email.notblank}")
+    @Email(message = "{email.format}")
     @Column(name = "email", nullable = false)
     private String email;
 
-    @NotBlank(message = "Physical address is mandatory")
+    @NotBlank(message = "{physicaladdress.notblank}")
     @Column(name = "physical_address", nullable = false)
     private String physicalAddress;
 
-    @NotBlank(message = "Postal address is mandatory")
+    @NotBlank(message = "{postaladdress.notblank}")
     @Column(name = "postal_address", nullable = false)
     private String postalAddress;
 
-    @NotNull(message = "Start date is mandatory")
+    @NotNull(message = "{startdate.notnull}")
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @NotBlank(message = "Occupation is mandatory")
+    @NotBlank(message = "{occupation.notblank}")
     @Column(name = "occupation", nullable = false)
     private String occupation;
 

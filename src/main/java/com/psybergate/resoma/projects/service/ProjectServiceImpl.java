@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +30,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public Project captureProject(Project newProject) {
+    public Project captureProject(@Valid Project newProject) {
         return projectRepository.save(newProject);
     }
 
@@ -46,7 +47,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public Project updateProject(Project project) {
+    public Project updateProject(@Valid Project project) {
         return projectRepository.save(project);
     }
 
@@ -70,7 +71,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public Task addTaskToProject(Task newTask, UUID projectId) {
+    public Task addTaskToProject(@Valid Task newTask, UUID projectId) {
         Project project = retrieveProject(projectId);
         newTask.setProject(project);
         return taskRepository.save(newTask);
@@ -78,13 +79,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public List<Task> retrieveTasks(Project project) {
+    public List<Task> retrieveTasks(@Valid Project project) {
         return taskRepository.findAllByProjectAndDeleted(project, false);
     }
 
     @Override
     @Transactional
-    public void deleteTaskByProject(Project project) {
+    public void deleteTaskByProject(@Valid Project project) {
         List<Task> tasks = taskRepository.findAllByProjectAndDeleted(project, false);
         tasks.forEach(task -> {
             task.setDeleted(true);

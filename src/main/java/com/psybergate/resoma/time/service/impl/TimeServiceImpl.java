@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -34,7 +35,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry captureTime(TimeEntry timeEntry) {
+    public TimeEntry captureTime(@Valid TimeEntry timeEntry) {
         timeEntry.setStatus(Status.NEW);
         timeEntry = timeEntryRepository.save(timeEntry);
         saveStatusHistory(timeEntry);
@@ -53,7 +54,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry updateEntry(TimeEntry timeEntry) {
+    public TimeEntry updateEntry(@Valid TimeEntry timeEntry) {
         if (timeEntry.isApproved())
             throw new ValidationException("Status can not be APPROVED");
         timeEntry.setStatus(Status.NEW);
@@ -69,7 +70,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry submitEntry(TimeEntry timeEntry) {
+    public TimeEntry submitEntry(@Valid TimeEntry timeEntry) {
         if (!EnumSet.of(Status.NEW, Status.SUBMITTED, Status.REJECTED).contains(timeEntry.getStatus()))
             throw new ValidationException("Status can only be NEW, SUBMITTED or REJECTED");
         timeEntry.setStatus(Status.SUBMITTED);
@@ -81,7 +82,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry approveEntry(TimeEntry timeEntry) {
+    public TimeEntry approveEntry(@Valid TimeEntry timeEntry) {
         if (!EnumSet.of(Status.SUBMITTED).contains(timeEntry.getStatus()))
             throw new ValidationException("Status can only be SUBMITTED");
         timeEntry.setStatus(Status.APPROVED);
@@ -92,7 +93,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry rejectEntry(TimeEntry timeEntry) {
+    public TimeEntry rejectEntry(@Valid TimeEntry timeEntry) {
         if (!EnumSet.of(Status.SUBMITTED).contains(timeEntry.getStatus()))
             throw new ValidationException("Status can only be SUBMITTED");
         timeEntry.setStatus(Status.REJECTED);
@@ -103,7 +104,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public List<TimeEntry> submitEntries(List<TimeEntry> timeEntries) {
+    public List<TimeEntry> submitEntries(List<@Valid TimeEntry> timeEntries) {
         List<TimeEntry> submittedEntries = new ArrayList<>();
         timeEntries.forEach(timeEntry -> submittedEntries.add(submitEntry(timeEntry)));
         return submittedEntries;
@@ -111,7 +112,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public List<TimeEntry> approveEntries(List<TimeEntry> timeEntries) {
+    public List<TimeEntry> approveEntries(List<@Valid TimeEntry> timeEntries) {
         List<TimeEntry> submittedEntries = new ArrayList<>();
         timeEntries.forEach(timeEntry -> submittedEntries.add(approveEntry(timeEntry)));
         return submittedEntries;
@@ -119,7 +120,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public List<TimeEntry> rejectEntries(List<TimeEntry> entries) {
+    public List<TimeEntry> rejectEntries(List<@Valid TimeEntry> entries) {
         List<TimeEntry> rejectedEntries = new ArrayList<>();
         entries.forEach(timeEntry -> rejectedEntries.add(rejectEntry(timeEntry)));
         return rejectedEntries;

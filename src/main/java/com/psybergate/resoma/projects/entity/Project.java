@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -18,18 +19,19 @@ import java.util.UUID;
 @Entity(name = "project")
 public class Project extends BaseEntity {
 
-    @NotBlank(message = "Project code is mandatory")
+    @NotBlank(message = "{projectcode.notblank}")
     @Column(name = "code", nullable = false, unique = true)
     private String code;
 
-    @NotBlank(message = "Name is mandatory")
+    @NotBlank(message = "{projectname.notblank}")
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotBlank(message = "Client code is mandatory")
+    @NotBlank(message = "{clientcode.notblank}")
     @Column(name = "client_code", nullable = false)
     private String clientCode;
 
+    @NotNull(message = "{startdate.notnull}")
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 

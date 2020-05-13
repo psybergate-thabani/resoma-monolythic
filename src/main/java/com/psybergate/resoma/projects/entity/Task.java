@@ -21,15 +21,15 @@ import java.util.UUID;
 @Entity(name = "task")
 public class Task extends BaseEntity {
 
-    @NotBlank(message = "Task code is mandatory")
+    @NotBlank(message = "{taskcode.notblank}")
     @Column(name = "code", nullable = false, unique = true)
     private String code;
 
-    @NotNull(message = "Task name is mandatory")
+    @NotNull(message = "{taskname.notblank}")
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotNull(message = "Project is mandatory")
+    @NotNull(message = "{project.notnull}")
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
