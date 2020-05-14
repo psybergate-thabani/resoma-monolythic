@@ -1,5 +1,6 @@
 package com.psybergate.resoma.time.service;
 
+import com.psybergate.resoma.gateway.dto.TimeEntryDTO;
 import com.psybergate.resoma.time.entity.TimeEntry;
 
 import java.util.List;
@@ -28,4 +29,6 @@ public interface TimeService {
     List<TimeEntry> submitEntries(List<TimeEntry> entries);
 
     List<TimeEntry> rejectEntries(List<TimeEntry> entries);
+
+    TimeEntry captureTime2(TimeEntryDTO timeEntryDTO);
 }

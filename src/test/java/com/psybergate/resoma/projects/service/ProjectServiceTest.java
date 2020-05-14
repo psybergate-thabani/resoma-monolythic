@@ -105,7 +105,8 @@ class ProjectServiceTest {
         when(projectRepository.save(project)).thenReturn(project);
 
         //Act
-        projectService.addPersonToProject("emp1", id);
+        UUID employeeId = UUID.randomUUID();
+        projectService.addPersonToProject(employeeId, id);
 
         //Assert
         verify(projectRepository, times(1)).findByIdAndDeleted(id,false);

@@ -1,5 +1,10 @@
 package com.psybergate.resoma.time.service.impl;
 
+import com.psybergate.resoma.gateway.dto.TimeEntryDTO;
+import com.psybergate.resoma.people.entity.Employee;
+import com.psybergate.resoma.people.service.EmployeeService;
+import com.psybergate.resoma.projects.entity.Task;
+import com.psybergate.resoma.projects.service.ProjectService;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.StatusHistory;
 import com.psybergate.resoma.time.entity.TimeEntry;
@@ -13,10 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -26,11 +28,19 @@ public class TimeServiceImpl implements TimeService {
 
     private StatusHistoryRepository statusHistoryRepository;
 
+    private ProjectService projectService;
+
+    private EmployeeService employeeService;
+
     @Autowired
     public TimeServiceImpl(TimeEntryRepository timeEntryRepository,
-                           StatusHistoryRepository statusHistoryRepository) {
+                           StatusHistoryRepository statusHistoryRepository,
+                           ProjectService projectService,
+                           EmployeeService employeeService) {
         this.timeEntryRepository = timeEntryRepository;
         this.statusHistoryRepository = statusHistoryRepository;
+        this.projectService = projectService;
+        this.employeeService = employeeService;
     }
 
     @Override
@@ -124,6 +134,20 @@ public class TimeServiceImpl implements TimeService {
         List<TimeEntry> rejectedEntries = new ArrayList<>();
         entries.forEach(timeEntry -> rejectedEntries.add(rejectEntry(timeEntry)));
         return rejectedEntries;
+    }
+
+    @Override
+    public TimeEntry captureTime2(TimeEntryDTO timeEntryDTO) {
+        TimeEntry timeEntry = timeEntryDTO.getTimeEntry();
+        Task task = projectService.retrieveTask(timeEntryDTO.getTaskId());
+        if (Objects.isNull(task))
+            throw new ValidationException("Task does not exist");
+        timeEntry.setTask(task);
+        Employee employee = employeeService.retrieveEmployee(timeEntryDTO.getEmployeeId());
+        if (Objects.isNull(employee))
+            throw new ValidationException("Employee does not exist");
+        timeEntry.setEmployee(employee);
+        return timeEntry;
     }
 
     private void deleteEntry(TimeEntry timeEntry) {

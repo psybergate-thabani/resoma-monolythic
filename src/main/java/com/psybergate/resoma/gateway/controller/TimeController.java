@@ -1,5 +1,10 @@
 package com.psybergate.resoma.gateway.controller;
 
+import com.psybergate.resoma.gateway.dto.TimeEntryDTO;
+import com.psybergate.resoma.people.entity.Employee;
+import com.psybergate.resoma.people.service.EmployeeService;
+import com.psybergate.resoma.projects.entity.Task;
+import com.psybergate.resoma.projects.service.ProjectService;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.service.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -16,12 +22,30 @@ import java.util.UUID;
 @RequestMapping(path = "/api/time")
 public class TimeController {
 
-    @Autowired
     private TimeService timeService;
 
+    private ProjectService projectService;
+
+    private EmployeeService employeeService;
+
+    @Autowired
+    public TimeController(TimeService timeService, ProjectService projectService, EmployeeService employeeService) {
+        this.timeService = timeService;
+        this.projectService = projectService;
+        this.employeeService = employeeService;
+    }
+
+
     @PostMapping("v1/time-entries")
-    public ResponseEntity<TimeEntry> captureTimeEntry(@RequestBody @Valid TimeEntry timeEntry) {
+    public ResponseEntity<TimeEntry> captureTimeEntry(@RequestBody TimeEntryDTO timeEntryDTO) {
+        TimeEntry timeEntry = buildTimeEntry(timeEntryDTO);
         TimeEntry retrievedTimeEntry = timeService.captureTime(timeEntry);
+        return ResponseEntity.ok(retrievedTimeEntry);
+    }
+
+    @PostMapping("v2/time-entries")
+    public ResponseEntity<TimeEntry> captureTimeEntry2(@RequestBody TimeEntryDTO timeEntryDTO) {
+        TimeEntry retrievedTimeEntry = timeService.captureTime2(timeEntryDTO);
         return ResponseEntity.ok(retrievedTimeEntry);
     }
 
@@ -42,16 +66,31 @@ public class TimeController {
     }
 
     @PutMapping("v1/time-entries/{timeEntryId}")
-    public ResponseEntity<TimeEntry> updateTimeEntry(@PathVariable UUID timeEntryId, @RequestBody @Valid TimeEntry timeEntry) {
+    public ResponseEntity<TimeEntry> updateTimeEntry(@PathVariable UUID timeEntryId, @RequestBody TimeEntryDTO timeEntryDTO) {
+        TimeEntry timeEntry = buildTimeEntry(timeEntryDTO);
         if (!timeEntryId.equals(timeEntry.getId()))
             throw new ValidationException("id in url path does not match time entry id in request body");
         TimeEntry retrievedTimeEntry = timeService.updateEntry(timeEntry);
         return ResponseEntity.ok(retrievedTimeEntry);
     }
 
+    private TimeEntry buildTimeEntry(TimeEntryDTO timeEntryDTO) {
+        TimeEntry timeEntry = timeEntryDTO.getTimeEntry();
+        Task task = projectService.retrieveTask(timeEntryDTO.getTaskId());
+        if (Objects.isNull(task))
+            throw new ValidationException("Task does not exist");
+        timeEntry.setTask(task);
+        Employee employee = employeeService.retrieveEmployee(timeEntryDTO.getEmployeeId());
+        if (Objects.isNull(employee))
+            throw new ValidationException("Employee does not exist");
+        timeEntry.setEmployee(employee);
+        return timeEntry;
+    }
+
     @PutMapping(path = "v1/time-entries/{timeEntryId}/submit")
     public ResponseEntity<TimeEntry> submitTimeEntry(@PathVariable UUID timeEntryId,
-                                                     @RequestBody @Valid TimeEntry timeEntry) {
+                                                     @RequestBody TimeEntryDTO timeEntryDTO) {
+        TimeEntry timeEntry = buildTimeEntry(timeEntryDTO);
         if (!timeEntryId.equals(timeEntry.getId()))
             throw new ValidationException("id in url path does not match time entry id in request body");
         return ResponseEntity.ok(timeService.submitEntry(timeEntry));
@@ -63,7 +102,8 @@ public class TimeController {
     }
 
     @PutMapping(path = "v1/time-entries/{timeEntryId}/approve")
-    public ResponseEntity<TimeEntry> approveTimeEntry(@PathVariable UUID timeEntryId, @RequestBody @Valid TimeEntry timeEntry) {
+    public ResponseEntity<TimeEntry> approveTimeEntry(@PathVariable UUID timeEntryId, @RequestBody TimeEntryDTO timeEntryDTO) {
+        TimeEntry timeEntry = buildTimeEntry(timeEntryDTO);
         if (!timeEntryId.equals(timeEntry.getId()))
             throw new ValidationException("id in url path does not match time entry id in request body");
         return ResponseEntity.ok(timeService.approveEntry(timeEntry));
@@ -76,7 +116,8 @@ public class TimeController {
 
 
     @PutMapping(path = "v1/time-entries/{id}/reject")
-    public ResponseEntity<TimeEntry> rejectTimeEntry(@PathVariable(name = "id") UUID entryId, @RequestBody @Valid TimeEntry timeEntry) {
+    public ResponseEntity<TimeEntry> rejectTimeEntry(@PathVariable(name = "id") UUID entryId, @RequestBody TimeEntryDTO timeEntryDTO) {
+        TimeEntry timeEntry = buildTimeEntry(timeEntryDTO);
         if (!entryId.equals(timeEntry.getId()))
             throw new ValidationException("id in url path does not match time entry id in request body");
         return ResponseEntity.ok(timeService.rejectEntry(timeEntry));

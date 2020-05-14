@@ -7,7 +7,7 @@ import java.util.UUID;
 @Data
 public class AllocationDTO {
 
-    public String employeeCode;
+    public UUID employeeId;
 
     public UUID projectId;
 

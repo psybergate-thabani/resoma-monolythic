@@ -1,24 +1,30 @@
 package com.psybergate.resoma.gateway.controller;
 
+import com.psybergate.resoma.gateway.dto.TaskDTO;
 import com.psybergate.resoma.projects.dto.AllocationDTO;
+import com.psybergate.resoma.projects.entity.Allocation;
 import com.psybergate.resoma.projects.entity.Project;
 import com.psybergate.resoma.projects.entity.Task;
 import com.psybergate.resoma.projects.service.ProjectService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/project")
 public class ProjectController {
 
-    @Autowired
     private ProjectService projectService;
+
+    public ProjectController(ProjectService projectService) {
+        this.projectService = projectService;
+    }
 
     @PostMapping("v1/project-entries")
     public ResponseEntity<Project> captureProject(@RequestBody @Valid Project project) {
@@ -44,9 +50,10 @@ public class ProjectController {
     }
 
     @PutMapping(value = "v1/project-entries/{projectId}/tasks")
-    public ResponseEntity<Task> addTaskToTheProject(@RequestBody @Valid Task newTask,
+    public ResponseEntity<Task> addTaskToTheProject(@RequestBody TaskDTO newTask,
                                                     @PathVariable UUID projectId) {
-        return ResponseEntity.ok(projectService.addTaskToProject(newTask, projectId));
+        Task task = buildTask(newTask);
+        return ResponseEntity.ok(projectService.addTaskToProject(task, projectId));
     }
 
     @GetMapping(value = "v1/project-entries/{projectId}/tasks", params = {"deleted"})
@@ -60,7 +67,7 @@ public class ProjectController {
     public ResponseEntity<Project> addPersonToAProject(@RequestBody AllocationDTO allocationDTO, @PathVariable UUID projectId) {
         if (!projectId.equals(allocationDTO.getProjectId()))
             throw new ValidationException("Id in request body does not match Id in url path");
-        projectService.addPersonToProject(allocationDTO.getEmployeeCode(), allocationDTO.getProjectId());
+        projectService.addPersonToProject(allocationDTO.getEmployeeId(), allocationDTO.getProjectId());
         return ResponseEntity.ok(projectService.retrieveProject(projectId));
     }
 
@@ -74,5 +81,14 @@ public class ProjectController {
     public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId, @PathVariable UUID projectId) {
         projectService.deleteTask(taskId);
         return ResponseEntity.ok().build();
+    }
+
+    private Task buildTask(TaskDTO taskDTO) {
+        Task task = taskDTO.getTask();
+        Project project = projectService.retrieveProject(taskDTO.getProjectId());
+        if (Objects.isNull(project))
+            throw new ValidationException("Project with id \"" + taskDTO.getProjectId() + "\" does not exist");
+        task.setProject(project);
+        return task;
     }
 }

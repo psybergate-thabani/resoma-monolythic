@@ -1,16 +1,20 @@
 package com.psybergate.resoma.projects.service;
 
+import com.psybergate.resoma.projects.entity.Allocation;
 import com.psybergate.resoma.projects.entity.Project;
 import com.psybergate.resoma.projects.entity.Task;
+import com.psybergate.resoma.projects.repository.AllocationRepository;
 import com.psybergate.resoma.projects.repository.ProjectRepository;
 import com.psybergate.resoma.projects.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.naming.CompositeName;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -19,6 +23,7 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectRepository projectRepository;
 
     private TaskRepository taskRepository;
+    private AllocationRepository allocationRepository;
 
     @Autowired
     public ProjectServiceImpl(
@@ -53,7 +58,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public void addPersonToProject(String employeeCode, UUID projectId) {
+    public void addPersonToProject(UUID employeeId, UUID projectId) {
         Project project = retrieveProject(projectId);
 //        project.getTeam().add(employeeCode);
         projectRepository.save(project);
@@ -104,6 +109,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Task retrieveTask(UUID taskId) {
         return taskRepository.findByIdAndDeleted(taskId, false);
+    }
+
+    @Override
+    public Set<Allocation> retrieveAllocations(Project project) {
+        return allocationRepository.findAllocationByProject(project);
     }
 
 }
