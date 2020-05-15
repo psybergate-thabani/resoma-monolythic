@@ -13,6 +13,11 @@ insert into allocation (id, version, employee_id, project_id, created_by, create
 ('d5436fd9ec184fe4a0402d66992be407', 0, '65ed6644718b11eabc550242ac130003', 'd5436fd9ec184fe4a0402d66992be407', 'mahlori', CURRENT_DATE, CURRENT_DATE, 'mahlori', FALSE),
 ('0b5af6c17acb4ab0a3812a670daa1e42', 0, '65ed6644718b11eabc550242ac130003', '0b5af6c17acb4ab0a3812a670daa1e42', 'mahlori', CURRENT_DATE, CURRENT_DATE, 'mahlori', FALSE),
 ('163d87495fd04e67aaad6ec6233b8dda', 0, '1061cfca718c11eabc550242ac130003', '0b5af6c17acb4ab0a3812a670daa1e42', 'mahlori', CURRENT_DATE, CURRENT_DATE, 'mahlori', FALSE);
+-- insert into allocation (version, employee_id, project_id, created_by, created, updated, updated_by, deleted) values
+-- (0, '65ed6644718b11eabc550242ac130003', 'd5436fd9ec184fe4a0402d66992be407', 'mahlori', CURRENT_DATE, CURRENT_DATE, 'mahlori', FALSE),
+-- (0, '65ed6644718b11eabc550242ac130003', '0b5af6c17acb4ab0a3812a670daa1e42', 'mahlori', CURRENT_DATE, CURRENT_DATE, 'mahlori', FALSE),
+-- (0, '1061cfca718c11eabc550242ac130003', '0b5af6c17acb4ab0a3812a670daa1e42', 'mahlori', CURRENT_DATE, CURRENT_DATE, 'mahlori', FALSE);
+
 insert into Time_Entry (id, version, employee_id, task_id, status, status_reason, description, period, date, deleted, created_by, created) values
 ('56269d672e0b44e58c9541d2b20d7a75',0,'65ed6644718b11eabc550242ac130003', '2e60b4f5f4f74dd1a62d92c2ea864be7', 'NEW','Dummy data','Batch and Support',500, CURRENT_DATE, FALSE,'system',CURRENT_TIMESTAMP),
 ('94b97da909e44aab9816913e109463a7',0,'65ed6644718b11eabc550242ac130003', 'e3140fd9abbc4b348de5414b4a530f2e', 'NEW','Dummy data','Batch and Support',1800, CURRENT_DATE, FALSE,'system',CURRENT_TIMESTAMP),

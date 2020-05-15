@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface AllocationRepository extends JpaRepository<Allocation, UUID> {
 
-    Set<Allocation> findAllocationByProject(Project project);
+    Set<Allocation> findAllByProject(Project project);
 
+    Set<Allocation> findAllByProjectAndDeleted(Project project, Boolean deleted);
 }

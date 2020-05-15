@@ -1,9 +1,11 @@
 package com.psybergate.resoma.projects.service;
 
 import com.psybergate.resoma.people.entity.Employee;
+import com.psybergate.resoma.projects.entity.Allocation;
 import com.psybergate.resoma.projects.entity.Project;
 import com.psybergate.resoma.projects.entity.ProjectType;
 import com.psybergate.resoma.projects.entity.Task;
+import com.psybergate.resoma.projects.repository.AllocationRepository;
 import com.psybergate.resoma.projects.repository.ProjectRepository;
 import com.psybergate.resoma.projects.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -26,13 +29,15 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private TaskRepository taskRepository;
+    @Mock
+    private AllocationRepository allocationRepository;
     private ProjectService projectService;
     private Project project;
     private Set<Employee> team = new HashSet<>();
 
     @BeforeEach
     void setUp() {
-        projectService = new ProjectServiceImpl(projectRepository, taskRepository);
+        projectService = new ProjectServiceImpl(projectRepository, taskRepository, allocationRepository);
         team.add(new Employee("emp1", "John", "Doe", "JohnD@resoma.com", "78 Home Address, Johannesburg",
                 "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active"));
         project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
@@ -215,4 +220,84 @@ class ProjectServiceTest {
         assertEquals(task, resultTask);
         verify(taskRepository, times(1)).findByIdAndDeleted(taskId,false);
     }
+
+    @Test
+    void shouldReturnAllocation_whenAllocationIsRetrievedById() {
+        //Arrange
+        Allocation allocation = new Allocation(project, new Employee());
+        UUID allocationId = allocation.getId();
+        when(allocationRepository.getOne(allocationId)).thenReturn(allocation);
+
+        //Act
+        Allocation resultAllocation = projectService.retrieveAllocation(allocationId);
+
+        //Assert
+        assertNotNull(resultAllocation);
+        assertEquals(allocation, resultAllocation);
+        verify(allocationRepository, times(1)).getOne(allocationId);
+    }
+
+    @Test
+    void shouldDeallocate_whenEmployeeIsDeallocated() {
+        //Arrange
+        Allocation allocation = new Allocation();
+        UUID id = allocation.getId();
+        when(allocationRepository.getOne(id)).thenReturn(allocation);
+        when(allocationRepository.save(allocation)).thenReturn(allocation);
+
+        //Act
+        projectService.deallocateEmployee(id);
+
+        //Assert
+        verify(allocationRepository, times(1)).getOne(id);
+        verify(allocationRepository, times(1)).save(allocation);
+    }
+
+    @Test
+    void shouldRetrieveAllocations_whenAllocationsAreRetrievedByProject() {
+        //Arrange
+        Allocation allocation = new Allocation();
+        when(allocationRepository.findAllByProject(project))
+                .thenReturn(Collections.singletonList(allocation).stream().collect(Collectors.toSet()));
+
+        //Act
+        Set<Allocation> resultAllocations = projectService.retrieveAllocations(project);
+
+        //Assert
+        assertNotNull(resultAllocations);
+        assertEquals(1, resultAllocations.size());
+    }
+
+    @Test
+    void shouldAllocateEmployeeToProject_whenEmployeeIsAllocatedToProject() {
+        //Arrange
+        Allocation allocation = new Allocation();
+        when(allocationRepository.save(allocation)).thenReturn(allocation);
+
+        //Act
+        Allocation resultAllocation = projectService.allocateEmployee(allocation);
+
+        //Assert
+        assertNotNull(resultAllocation);
+        assertEquals(allocation, resultAllocation);
+        verify(allocationRepository, times(1)).save(allocation);
+
+    }
+
+    @Test
+    void shouldRetrieveAllocations_whenAllocationsAreRetrievedByProjectAndDeleted() {
+        //Arrange
+        Allocation allocation = new Allocation();
+        when(allocationRepository.findAllByProjectAndDeleted(any(Project.class), anyBoolean()))
+                .thenReturn(Collections.singletonList(allocation).stream().collect(Collectors.toSet()));
+
+        //Act
+        Set<Allocation> resultAllocations = projectService.retrieveAllocations(project, false);
+
+        //Assert
+        assertNotNull(resultAllocations);
+        assertEquals(1, resultAllocations.size());
+    }
+
+
 }

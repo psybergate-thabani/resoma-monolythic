@@ -2,28 +2,31 @@ package com.psybergate.resoma.projects.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.psybergate.resoma.people.entity.Employee;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @EqualsAndHashCode(of = {"employee", "project"}, callSuper = false)
 @Entity
-@Table(name = "allocation")
+@Table(name = "allocation", uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "employee_id"}))
 public class Allocation extends BaseEntity {
 
     @ManyToOne()
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @JsonIgnore
     @ManyToOne
     private Project project;
+
+    public Allocation(Project project, Employee employee){
+        this.project = project;
+        this.employee =  employee;
+    }
 
 }

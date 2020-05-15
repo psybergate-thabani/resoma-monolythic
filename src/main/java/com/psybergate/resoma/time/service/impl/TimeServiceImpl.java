@@ -147,7 +147,7 @@ public class TimeServiceImpl implements TimeService {
         if (Objects.isNull(employee))
             throw new ValidationException("Employee does not exist");
         timeEntry.setEmployee(employee);
-        return timeEntry;
+        return captureTime(timeEntry);
     }
 
     private void deleteEntry(TimeEntry timeEntry) {

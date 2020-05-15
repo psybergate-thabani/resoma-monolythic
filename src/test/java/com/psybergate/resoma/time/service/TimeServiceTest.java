@@ -1,9 +1,12 @@
 package com.psybergate.resoma.time.service;
 
+import com.psybergate.resoma.gateway.dto.TimeEntryDTO;
 import com.psybergate.resoma.people.entity.Employee;
+import com.psybergate.resoma.people.service.EmployeeService;
 import com.psybergate.resoma.projects.entity.Project;
 import com.psybergate.resoma.projects.entity.ProjectType;
 import com.psybergate.resoma.projects.entity.Task;
+import com.psybergate.resoma.projects.service.ProjectService;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.StatusHistory;
 import com.psybergate.resoma.time.entity.TimeEntry;
@@ -32,6 +35,11 @@ class TimeServiceTest {
     private TimeEntryRepository mockTimeEntryRepository;
     @Mock
     private StatusHistoryRepository mockStatusHistoryRepository;
+    @Mock
+    private ProjectService mockProjectService;
+    @Mock
+    private EmployeeService mockEmployeeService;
+
     private TimeService timeService;
     private TimeEntry testTimeEntry;
     private TimeEntry testTimeEntry2;
@@ -44,7 +52,7 @@ class TimeServiceTest {
         Project project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
 
         Task task = new Task("task1", "Analysis", project, false);
-        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockStatusHistoryRepository, null, null);
+        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockStatusHistoryRepository, mockProjectService, mockEmployeeService);
         testTimeEntry = new TimeEntry(employee, task, "descr1", 100, LocalDate.now(), false);
         testTimeEntry2 = new TimeEntry(employee, task, "descr2", 100, LocalDate.now(), false);
         testTimeEntry3 = new TimeEntry(employee, task, "descr3", 200, LocalDate.now(), false);
@@ -303,4 +311,23 @@ class TimeServiceTest {
         submitEntries.forEach((t) -> assertEquals(Status.REJECTED, t.getStatus()));
     }
 
+    @Test
+    void shouldCaptureTimeEntry_whenCaptureTimeVersion2() {
+        //Arrange
+        Task task = new Task();
+        task.setId(UUID.randomUUID());
+        Employee employee = new Employee();
+        employee.setId(UUID.randomUUID());
+        TimeEntryDTO timeEntryDTO = new TimeEntryDTO(testTimeEntry, UUID.randomUUID(), UUID.randomUUID());
+        when(mockProjectService.retrieveTask(timeEntryDTO.getTaskId())).thenReturn(task);
+        when(mockEmployeeService.retrieveEmployee(timeEntryDTO.getEmployeeId())).thenReturn(employee);
+        when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
+
+        //Act
+        TimeEntry timeEntry = timeService.captureTime2(timeEntryDTO);
+
+        //Assert
+        assertNotNull(timeEntry);
+        assertEquals(Status.NEW, timeEntry.getStatus());
+    }
 }

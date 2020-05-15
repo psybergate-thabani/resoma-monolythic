@@ -1,7 +1,9 @@
 package com.psybergate.resoma.gateway.controller;
 
+import com.psybergate.resoma.gateway.dto.AllocationDTO;
 import com.psybergate.resoma.gateway.dto.TaskDTO;
-import com.psybergate.resoma.projects.dto.AllocationDTO;
+import com.psybergate.resoma.people.entity.Employee;
+import com.psybergate.resoma.people.service.EmployeeService;
 import com.psybergate.resoma.projects.entity.Allocation;
 import com.psybergate.resoma.projects.entity.Project;
 import com.psybergate.resoma.projects.entity.Task;
@@ -21,9 +23,11 @@ import java.util.UUID;
 public class ProjectController {
 
     private ProjectService projectService;
+    private EmployeeService employeeService;
 
-    public ProjectController(ProjectService projectService) {
+    public ProjectController(ProjectService projectService, EmployeeService employeeService) {
         this.projectService = projectService;
+        this.employeeService = employeeService;
     }
 
     @PostMapping("v1/project-entries")
@@ -81,6 +85,45 @@ public class ProjectController {
     public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId, @PathVariable UUID projectId) {
         projectService.deleteTask(taskId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("v1/project-entries/{projectId}/allocations")
+    public ResponseEntity<Set<Allocation>> retrieveProjectAllocations(@PathVariable UUID projectId) {
+        Project project = projectService.retrieveProject(projectId);
+        return ResponseEntity.ok(projectService.retrieveAllocations(project));
+    }
+
+    @GetMapping(value = "v1/project-entries/{projectId}/allocations", params = "deleted")
+    public ResponseEntity<Set<Allocation>> retrieveProjectAllocations(@PathVariable UUID projectId, Boolean deleted) {
+        Project project = projectService.retrieveProject(projectId);
+        return ResponseEntity.ok(projectService.retrieveAllocations(project, deleted));
+    }
+
+    @GetMapping("v1/project-entries/{projectId}/allocations/{allocationId}")
+    public ResponseEntity<Allocation> retrieveAllocation(@PathVariable UUID allocationId) {
+        return ResponseEntity.ok(projectService.retrieveAllocation(allocationId));
+    }
+
+    @PostMapping("v1/project-entries/{projectId}/allocations")
+    public ResponseEntity<Allocation> allocateEmployee(@PathVariable UUID uuid, @RequestBody AllocationDTO allocationDTO) {
+        Allocation allocation = buildAllocation(allocationDTO);
+        return ResponseEntity.ok(projectService.allocateEmployee(allocation));
+    }
+
+    @DeleteMapping("v1/project-entries/{projectId}/allocations/{allocationId}")
+    public ResponseEntity<Void> deallocateEmployee(@PathVariable UUID projectId, @PathVariable UUID allocationId) {
+        projectService.deallocateEmployee(allocationId);
+        return ResponseEntity.ok().build();
+    }
+
+    private Allocation buildAllocation(AllocationDTO allocationDTO) {
+        Employee employee = employeeService.retrieveEmployee(allocationDTO.getEmployeeId());
+        Project project = projectService.retrieveProject(allocationDTO.getProjectId());
+        if (Objects.isNull(employee))
+            throw new ValidationException("Employee with id \"" + allocationDTO.getEmployeeId() + "\" does not exist");
+        if (Objects.isNull(project))
+            throw new ValidationException("Project with id \"" + allocationDTO.getProjectId() + "\" does not exist");
+        return new Allocation(project, employee);
     }
 
     private Task buildTask(TaskDTO taskDTO) {

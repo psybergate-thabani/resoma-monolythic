@@ -9,7 +9,6 @@ import com.psybergate.resoma.projects.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.naming.CompositeName;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
@@ -23,14 +22,17 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectRepository projectRepository;
 
     private TaskRepository taskRepository;
+
     private AllocationRepository allocationRepository;
 
     @Autowired
     public ProjectServiceImpl(
             ProjectRepository projectRepository,
-            TaskRepository taskRepository) {
+            TaskRepository taskRepository,
+            AllocationRepository allocationRepository) {
         this.projectRepository = projectRepository;
         this.taskRepository = taskRepository;
+        this.allocationRepository = allocationRepository;
     }
 
     @Override
@@ -113,7 +115,29 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Set<Allocation> retrieveAllocations(Project project) {
-        return allocationRepository.findAllocationByProject(project);
+        return allocationRepository.findAllByProject(project);
+    }
+
+    @Override
+    public Allocation allocateEmployee(Allocation allocation) {
+        return allocationRepository.save(allocation);
+    }
+
+    @Override
+    public void deallocateEmployee(UUID allocationId) {
+        Allocation allocation = allocationRepository.getOne(allocationId);
+        allocation.setDeleted(true);
+        allocationRepository.save(allocation);
+    }
+
+    @Override
+    public Allocation retrieveAllocation(UUID allocationId) {
+        return allocationRepository.getOne(allocationId);
+    }
+
+    @Override
+    public Set<Allocation> retrieveAllocations(Project project, Boolean deleted) {
+        return allocationRepository.findAllByProjectAndDeleted(project, deleted);
     }
 
 }

@@ -4,13 +4,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -37,9 +38,6 @@ public class Project extends BaseEntity {
 
     @Column(name = "end_date")
     private LocalDate endDate;
-
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    private Set<Allocation> allocations = new HashSet<>();
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
