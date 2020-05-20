@@ -1,6 +1,6 @@
 package com.psybergate.resoma.gateway.dto;
 
-import com.psybergate.resoma.projects.entity.Task;
+import com.psybergate.resoma.project.entity.Task;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

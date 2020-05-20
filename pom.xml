@@ -10,10 +10,17 @@
     </parent>
     <groupId>com.psybergate.resoma</groupId>
     <artifactId>resoma</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <name>resoma</name>
     <description>Psybergate Resource Management System</description>
+
+    <modules>
+        <module>people</module>
+        <module>project</module>
+        <module>time</module>
+        <module>gateway</module>
+    </modules>
 
     <properties>
         <java.version>1.8</java.version>
@@ -57,12 +64,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

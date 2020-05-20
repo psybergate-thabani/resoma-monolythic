@@ -1,12 +1,12 @@
 package com.psybergate.resoma.time.service;
 
-import com.psybergate.resoma.gateway.dto.TimeEntryDTO;
 import com.psybergate.resoma.people.entity.Employee;
 import com.psybergate.resoma.people.service.EmployeeService;
-import com.psybergate.resoma.projects.entity.Project;
-import com.psybergate.resoma.projects.entity.ProjectType;
-import com.psybergate.resoma.projects.entity.Task;
-import com.psybergate.resoma.projects.service.ProjectService;
+import com.psybergate.resoma.project.entity.Project;
+import com.psybergate.resoma.project.entity.ProjectType;
+import com.psybergate.resoma.project.entity.Task;
+import com.psybergate.resoma.project.service.ProjectService;
+import com.psybergate.resoma.time.dto.TimeEntryDTO;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.StatusHistory;
 import com.psybergate.resoma.time.entity.TimeEntry;

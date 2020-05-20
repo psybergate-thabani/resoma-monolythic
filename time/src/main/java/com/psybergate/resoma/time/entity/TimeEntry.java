@@ -1,7 +1,7 @@
 package com.psybergate.resoma.time.entity;
 
 import com.psybergate.resoma.people.entity.Employee;
-import com.psybergate.resoma.projects.entity.Task;
+import com.psybergate.resoma.project.entity.Task;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

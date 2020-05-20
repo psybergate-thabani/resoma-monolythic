@@ -1,4 +1,4 @@
-package com.psybergate.resoma.config;
+package com.psybergate.resoma.gateway.config;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

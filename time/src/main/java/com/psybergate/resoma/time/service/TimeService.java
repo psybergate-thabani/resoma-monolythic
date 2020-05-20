@@ -1,6 +1,6 @@
 package com.psybergate.resoma.time.service;
 
-import com.psybergate.resoma.gateway.dto.TimeEntryDTO;
+import com.psybergate.resoma.time.dto.TimeEntryDTO;
 import com.psybergate.resoma.time.entity.TimeEntry;
 
 import java.util.List;

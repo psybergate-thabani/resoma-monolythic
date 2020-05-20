@@ -11,5 +11,31 @@
 
     <artifactId>gateway</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.psybergate.resoma</groupId>
+            <artifactId>people</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.psybergate.resoma</groupId>
+            <artifactId>project</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.psybergate.resoma</groupId>
+            <artifactId>time</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

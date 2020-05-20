@@ -1,10 +1,10 @@
 package com.psybergate.resoma.gateway.controller;
 
-import com.psybergate.resoma.gateway.dto.TimeEntryDTO;
 import com.psybergate.resoma.people.entity.Employee;
 import com.psybergate.resoma.people.service.EmployeeService;
-import com.psybergate.resoma.projects.entity.Task;
-import com.psybergate.resoma.projects.service.ProjectService;
+import com.psybergate.resoma.project.entity.Task;
+import com.psybergate.resoma.project.service.ProjectService;
+import com.psybergate.resoma.time.dto.TimeEntryDTO;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.service.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
