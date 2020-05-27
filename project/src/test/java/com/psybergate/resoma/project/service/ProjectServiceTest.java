@@ -9,12 +9,14 @@ import com.psybergate.resoma.project.entity.Task;
 import com.psybergate.resoma.project.repository.AllocationRepository;
 import com.psybergate.resoma.project.repository.ProjectRepository;
 import com.psybergate.resoma.project.repository.TaskRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -64,7 +66,7 @@ class ProjectServiceTest {
         when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
 
         //Act
-        Project resultProject = projectService.retrieveProject(id);
+        Project resultProject = projectService.retrieveProject(id, false);
 
         //Assert
         assertNotNull(resultProject);
@@ -81,7 +83,7 @@ class ProjectServiceTest {
         when(projectRepository.findAllByDeleted(false)).thenReturn(projects);
 
         //Act
-        List<Project> resultProjects = projectService.retrieveProjects();
+        List<Project> resultProjects = projectService.retrieveProjects(false);
 
         //Assert
         assertEquals(3, resultProjects.size());
@@ -101,22 +103,6 @@ class ProjectServiceTest {
         assertNotNull(resultProject);
         assertEquals(project, resultProject);
 
-    }
-
-    @Test
-    void shouldAddEmployeeToProject_whenPersonIsAddedToProject() {
-        //Arrange
-        UUID id = project.getId();
-        when(projectRepository.findByIdAndDeleted(id,false)).thenReturn(project);
-        when(projectRepository.save(project)).thenReturn(project);
-
-        //Act
-        UUID employeeId = UUID.randomUUID();
-        projectService.addPersonToProject(employeeId, id);
-
-        //Assert
-        verify(projectRepository, times(1)).findByIdAndDeleted(id,false);
-        verify(projectRepository, times(1)).save(project);
     }
 
     @Test
@@ -140,6 +126,18 @@ class ProjectServiceTest {
     }
 
     @Test
+    void shouldThrowValidationException_whenProjectIsDeletedAndProjectDoesNotExist() {
+        //Arrange
+        UUID id = project.getId();
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(null);
+
+        //Act
+        Assertions.assertThrows(ValidationException.class, () -> {
+            projectService.deleteProject(id);
+        });
+    }
+
+    @Test
     void shouldAddTaskToProject_whenTaskIsAddedToProject() {
         //Arrange
         Task task = new Task("task1", "First Task", project, false);
@@ -155,6 +153,19 @@ class ProjectServiceTest {
         assertEquals(task, resultTask);
         verify(projectRepository, times(1)).findByIdAndDeleted(id, false);
         verify(taskRepository, times(1)).save(task);
+    }
+
+    @Test
+    void shouldThrowValidationException_whenTaskIsAddedToProjectThatDoesNotExist() {
+        //Arrange
+        Task task = new Task("task1", "First Task", null, false);
+        UUID id = project.getId();
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(null);
+
+        //Act And Assert
+        Assertions.assertThrows(ValidationException.class, () -> {
+            Task resultTask = projectService.addTaskToProject(task, id);
+        });
 
     }
 
@@ -211,7 +222,7 @@ class ProjectServiceTest {
         //Arrange
         Task task = new Task("task1", "First Task", project, false);
         UUID taskId = task.getId();
-        when(taskRepository.findByIdAndDeleted(taskId,false)).thenReturn(task);
+        when(taskRepository.findByIdAndDeleted(taskId, false)).thenReturn(task);
 
         //Act
         Task resultTask = projectService.retrieveTask(taskId);
@@ -219,7 +230,7 @@ class ProjectServiceTest {
         //Assert
         assertNotNull(resultTask);
         assertEquals(task, resultTask);
-        verify(taskRepository, times(1)).findByIdAndDeleted(taskId,false);
+        verify(taskRepository, times(1)).findByIdAndDeleted(taskId, false);
     }
 
     @Test
@@ -299,6 +310,4 @@ class ProjectServiceTest {
         assertNotNull(resultAllocations);
         assertEquals(1, resultAllocations.size());
     }
-
-
 }

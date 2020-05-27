@@ -14,6 +14,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,14 +44,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project retrieveProject(UUID id) {
-        return projectRepository.findByIdAndDeleted(id, false);
+    public Project retrieveProject(UUID id, boolean deleted) {
+        return projectRepository.findByIdAndDeleted(id, deleted);
     }
 
     @Override
     @Transactional
-    public List<Project> retrieveProjects() {
-        return projectRepository.findAllByDeleted(false);
+    public List<Project> retrieveProjects(boolean deleted) {
+        return projectRepository.findAllByDeleted(deleted);
     }
 
     @Override
@@ -61,17 +62,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public void addPersonToProject(UUID employeeId, UUID projectId) {
-        Project project = retrieveProject(projectId);
-//        project.getTeam().add(employeeCode);
-        projectRepository.save(project);
-    }
-
-    @Override
-    @Transactional
     public void deleteProject(UUID id) {
-        Project project = retrieveProject(id);
-        if (project == null) throw new ValidationException("Project does not exist");
+        Project project = retrieveProject(id, false);
+        if (Objects.isNull(project))
+            throw new ValidationException("Project does not exist");
+
         project.setDeleted(true);
         Project updatedProject = projectRepository.save(project);
         deleteTaskByProject(updatedProject);
@@ -80,7 +75,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public Task addTaskToProject(@Valid Task newTask, UUID projectId) {
-        Project project = retrieveProject(projectId);
+        Project project = retrieveProject(projectId, false);
+        if (Objects.isNull(project))
+            throw new ValidationException("Project with id \"" + projectId + "\" does not exist");
         newTask.setProject(project);
         return taskRepository.save(newTask);
     }
