@@ -61,18 +61,9 @@ public class ProjectController {
     }
 
     @GetMapping(value = "v1/project-entries/{projectId}/tasks", params = {"deleted"})
-    public ResponseEntity<List<Task>> retrieveTasksByProjectId(@PathVariable UUID projectId,
-                                                               @RequestParam("deleted") Boolean deleted) {
-        Project project = projectService.retrieveProject(projectId);
-        return ResponseEntity.ok(projectService.retrieveTasks(project));
-    }
-
-    @PutMapping("v1/project-entries/{projectId}/employee-allocations")
-    public ResponseEntity<Project> addPersonToAProject(@RequestBody AllocationDTO allocationDTO, @PathVariable UUID projectId) {
-        if (!projectId.equals(allocationDTO.getProjectId()))
-            throw new ValidationException("Id in request body does not match Id in url path");
-        projectService.addPersonToProject(allocationDTO.getEmployeeId(), allocationDTO.getProjectId());
-        return ResponseEntity.ok(projectService.retrieveProject(projectId));
+    public ResponseEntity<Set<Task>> retrieveTasksByProjectId(@PathVariable UUID projectId,
+                                                              @RequestParam("deleted") Boolean deleted) {
+        return ResponseEntity.ok(projectService.retrieveTasks(projectId, deleted));
     }
 
     @DeleteMapping("v1/project-entries/{projectId}")
@@ -89,14 +80,12 @@ public class ProjectController {
 
     @GetMapping("v1/project-entries/{projectId}/allocations")
     public ResponseEntity<Set<Allocation>> retrieveProjectAllocations(@PathVariable UUID projectId) {
-        Project project = projectService.retrieveProject(projectId);
-        return ResponseEntity.ok(projectService.retrieveAllocations(project));
+        return ResponseEntity.ok(projectService.retrieveAllocations(projectId));
     }
 
     @GetMapping(value = "v1/project-entries/{projectId}/allocations", params = "deleted")
     public ResponseEntity<Set<Allocation>> retrieveProjectAllocations(@PathVariable UUID projectId, Boolean deleted) {
-        Project project = projectService.retrieveProject(projectId);
-        return ResponseEntity.ok(projectService.retrieveAllocations(project, deleted));
+        return ResponseEntity.ok(projectService.retrieveAllocations(projectId, deleted));
     }
 
     @GetMapping("v1/project-entries/{projectId}/allocations/{allocationId}")
@@ -105,9 +94,14 @@ public class ProjectController {
     }
 
     @PostMapping("v1/project-entries/{projectId}/allocations")
-    public ResponseEntity<Allocation> allocateEmployee(@PathVariable UUID uuid, @RequestBody AllocationDTO allocationDTO) {
+    public ResponseEntity<Allocation> allocateEmployee(@PathVariable UUID projectId, @RequestBody AllocationDTO allocationDTO) {
         Allocation allocation = buildAllocation(allocationDTO);
-        return ResponseEntity.ok(projectService.allocateEmployee(allocation));
+        return ResponseEntity.ok(projectService.allocateEmployee(projectId, allocation));
+    }
+
+    @PostMapping("v1/project-entries/{projectId}/allocations/{allocationId}")
+    public ResponseEntity<Allocation> reallocateEmployee(@PathVariable UUID projectId, @PathVariable UUID allocationId) {
+        return ResponseEntity.ok(projectService.reallocateEmployee(allocationId));
     }
 
     @DeleteMapping("v1/project-entries/{projectId}/allocations/{allocationId}")
@@ -123,15 +117,11 @@ public class ProjectController {
             throw new ValidationException("Employee with id \"" + allocationDTO.getEmployeeId() + "\" does not exist");
         if (Objects.isNull(project))
             throw new ValidationException("Project with id \"" + allocationDTO.getProjectId() + "\" does not exist");
-        return new Allocation(project, employee);
+        return new Allocation(employee);
     }
 
     private Task buildTask(TaskDTO taskDTO) {
         Task task = taskDTO.getTask();
-        Project project = projectService.retrieveProject(taskDTO.getProjectId());
-        if (Objects.isNull(project))
-            throw new ValidationException("Project with id \"" + taskDTO.getProjectId() + "\" does not exist");
-        task.setProject(project);
         return task;
     }
 }

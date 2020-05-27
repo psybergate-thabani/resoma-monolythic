@@ -51,7 +51,7 @@ class TimeServiceTest {
                 "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active");
         Project project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
 
-        Task task = new Task("task1", "Analysis", project, false);
+        Task task = new Task("task1", "Analysis", false);
         timeService = new TimeServiceImpl(mockTimeEntryRepository, mockStatusHistoryRepository, mockProjectService, mockEmployeeService);
         testTimeEntry = new TimeEntry(employee, task, "descr1", 100, LocalDate.now(), false);
         testTimeEntry2 = new TimeEntry(employee, task, "descr2", 100, LocalDate.now(), false);

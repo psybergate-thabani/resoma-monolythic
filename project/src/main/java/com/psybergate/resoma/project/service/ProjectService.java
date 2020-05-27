@@ -1,7 +1,6 @@
 package com.psybergate.resoma.project.service;
 
 
-
 import com.psybergate.resoma.project.entity.Allocation;
 import com.psybergate.resoma.project.entity.Project;
 import com.psybergate.resoma.project.entity.Task;
@@ -20,27 +19,25 @@ public interface ProjectService {
 
     Project updateProject(Project project);
 
-    void addPersonToProject(UUID employeeId, UUID projectId);
-
     void deleteProject(UUID id);
 
     Task addTaskToProject(Task newTask, UUID projectId);
 
-    List<Task> retrieveTasks(Project project);
-
-    void deleteTaskByProject(Project project);
+    Set<Task> retrieveTasks(UUID projectId, boolean deleted);
 
     void deleteTask(UUID taskId);
 
     Task retrieveTask(UUID taskId);
 
-    Set<Allocation> retrieveAllocations(Project project);
+    Set<Allocation> retrieveAllocations(UUID projectId);
 
-    Allocation allocateEmployee(Allocation allocation);
+    Allocation allocateEmployee(UUID projectId, Allocation allocation);
 
     void deallocateEmployee(UUID allocationId);
 
     Allocation retrieveAllocation(UUID allocationId);
 
-    Set<Allocation> retrieveAllocations(Project project, Boolean deleted);
+    Set<Allocation> retrieveAllocations(UUID projectId, Boolean deleted);
+
+    Allocation reallocateEmployee(UUID allocationId);
 }
