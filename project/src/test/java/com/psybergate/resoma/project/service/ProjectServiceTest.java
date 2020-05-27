@@ -6,9 +6,7 @@ import com.psybergate.resoma.project.entity.Allocation;
 import com.psybergate.resoma.project.entity.Project;
 import com.psybergate.resoma.project.entity.ProjectType;
 import com.psybergate.resoma.project.entity.Task;
-import com.psybergate.resoma.project.repository.AllocationRepository;
 import com.psybergate.resoma.project.repository.ProjectRepository;
-import com.psybergate.resoma.project.repository.TaskRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,6 @@ import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,17 +27,13 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private TaskRepository taskRepository;
-    @Mock
-    private AllocationRepository allocationRepository;
     private ProjectService projectService;
     private Project project;
     private Set<Employee> team = new HashSet<>();
 
     @BeforeEach
     void setUp() {
-        projectService = new ProjectServiceImpl(projectRepository, taskRepository, allocationRepository);
+        projectService = new ProjectServiceImpl(projectRepository);
         team.add(new Employee("emp1", "John", "Doe", "JohnD@resoma.com", "78 Home Address, Johannesburg",
                 "79 Postal Address, Johannesburg", LocalDateTime.now(), LocalDate.now(), "Developer", "Active"));
         project = new Project("proj1", "First Project", "client1", LocalDate.now(), null, ProjectType.BILLABLE);
@@ -95,6 +88,7 @@ class ProjectServiceTest {
     @Test
     void shouldUpdateProject_whenProjectIsUpdated() {
         //Arrange
+        when(projectRepository.getOne(project.getId())).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
         //Act
         Project resultProject = projectService.updateProject(project);
@@ -109,20 +103,20 @@ class ProjectServiceTest {
     void shouldDeleteProject_whenProjectIsDeleted() {
         //Arrange
         UUID id = project.getId();
+        Task task = new Task("task1", "First Task", false);
+        Project project = new Project();
+        project.getTasks().add(task);
         when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
-        Task task = new Task("task1", "First Task", project, false);
-        when(taskRepository.findAllByProjectAndDeleted(project, false))
-                .thenReturn(Collections.singletonList(task));
 
         //Act
         projectService.deleteProject(id);
 
         //Assert
+        verify(projectRepository, times(1)).findByIdAndDeleted(id, false);
         verify(projectRepository, times(1)).save(project);
-        verify(taskRepository, times(1)).findAllByProjectAndDeleted(project, false);
-        verify(taskRepository, times(1)).save(any(Task.class));
-
+        assertTrue(project.isDeleted());
+        assertTrue(task.isDeleted());
     }
 
     @Test
@@ -140,10 +134,11 @@ class ProjectServiceTest {
     @Test
     void shouldAddTaskToProject_whenTaskIsAddedToProject() {
         //Arrange
-        Task task = new Task("task1", "First Task", project, false);
+        Task task = new Task("task1", "First Task", false);
         UUID id = project.getId();
+
         when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
-        when(taskRepository.save(task)).thenReturn(task);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
 
         //Act
         Task resultTask = projectService.addTaskToProject(task, id);
@@ -152,13 +147,14 @@ class ProjectServiceTest {
         assertNotNull(resultTask);
         assertEquals(task, resultTask);
         verify(projectRepository, times(1)).findByIdAndDeleted(id, false);
-        verify(taskRepository, times(1)).save(task);
+        verify(projectRepository, times(1)).save(any(Project.class));
+
     }
 
     @Test
     void shouldThrowValidationException_whenTaskIsAddedToProjectThatDoesNotExist() {
         //Arrange
-        Task task = new Task("task1", "First Task", null, false);
+        Task task = new Task("task1", "First Task", false);
         UUID id = project.getId();
         when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(null);
 
@@ -166,18 +162,18 @@ class ProjectServiceTest {
         Assertions.assertThrows(ValidationException.class, () -> {
             Task resultTask = projectService.addTaskToProject(task, id);
         });
-
     }
 
     @Test
     void shouldRetrieveTasks_whenTasksAreRetrieved() {
         //Arrange
-        Task task = new Task("task1", "First Task", project, false);
-        when(taskRepository.findAllByProjectAndDeleted(project, false))
-                .thenReturn(Collections.singletonList(task));
+        Task task = new Task("task1", "First Task", false);
+        Project project = new Project();
+        project.getTasks().add(task);
+        when(projectRepository.findByIdAndDeleted(project.getId(),false)).thenReturn(project);
 
         //Act
-        List<Task> resultTasks = projectService.retrieveTasks(project);
+        Set<Task> resultTasks = projectService.retrieveTasks(project.getId(), false);
 
         //Assert
         assertNotNull(resultTasks);
@@ -185,44 +181,33 @@ class ProjectServiceTest {
     }
 
     @Test
-    void shouldDeleteTaskByProject_whenTaskIsDeletedByProject() {
-        //Arrange
-        Task task = new Task("task1", "First Task", project, false);
-
-        when(taskRepository.findAllByProjectAndDeleted(project, false))
-                .thenReturn(Collections.singletonList(task));
-        when(taskRepository.save(task)).thenReturn(task);
-
-        //Act
-        projectService.deleteTaskByProject(project);
-
-        //Assert
-        verify(taskRepository, times(1)).findAllByProjectAndDeleted(project, false);
-        verify(taskRepository, times(1)).save(task);
-    }
-
-    @Test
     void shouldDeleteTask_whenTaskIsDeleted() {
         //Arrange
-        Task task = new Task("task1", "First Task", project, false);
+        Task task = new Task("task1", "First Task", false);
+        task.setId(UUID.randomUUID());
         UUID id = task.getId();
-        when(taskRepository.getOne(id)).thenReturn(task);
-        when(taskRepository.save(task)).thenReturn(task);
+        Project project = new Project();
+        project.getTasks().add(task);
+        when(projectRepository.findFirstByTasks_id(id)).thenReturn(project);
+        when(projectRepository.save(project)).thenReturn(project);
 
         //Act
         projectService.deleteTask(id);
 
         //Assert
-        verify(taskRepository, times(1)).getOne(id);
-        verify(taskRepository, times(1)).save(task);
+        verify(projectRepository, times(1)).findFirstByTasks_id(id);
+        verify(projectRepository, times(1)).save(project);
+        assertTrue(task.isDeleted());
     }
 
     @Test
     void shouldReturnTask_whenTaskIsRetrievedById() {
         //Arrange
-        Task task = new Task("task1", "First Task", project, false);
+        Task task = new Task("task1", "First Task", false);
+        Project project = new Project();
+        project.getTasks().add(task);
         UUID taskId = task.getId();
-        when(taskRepository.findByIdAndDeleted(taskId, false)).thenReturn(task);
+        when(projectRepository.findFirstByTasks_id(taskId)).thenReturn(project);
 
         //Act
         Task resultTask = projectService.retrieveTask(taskId);
@@ -230,15 +215,18 @@ class ProjectServiceTest {
         //Assert
         assertNotNull(resultTask);
         assertEquals(task, resultTask);
-        verify(taskRepository, times(1)).findByIdAndDeleted(taskId, false);
+        verify(projectRepository, times(1)).findFirstByTasks_id(taskId);
     }
 
     @Test
     void shouldReturnAllocation_whenAllocationIsRetrievedById() {
         //Arrange
-        Allocation allocation = new Allocation(project, new Employee());
+        Allocation allocation = new Allocation(new Employee());
+        allocation.setId(UUID.randomUUID());
         UUID allocationId = allocation.getId();
-        when(allocationRepository.getOne(allocationId)).thenReturn(allocation);
+        Project project = new Project();
+        project.getAllocations().add(allocation);
+        when(projectRepository.findFirstByAllocationsId(allocationId)).thenReturn(project);
 
         //Act
         Allocation resultAllocation = projectService.retrieveAllocation(allocationId);
@@ -246,34 +234,38 @@ class ProjectServiceTest {
         //Assert
         assertNotNull(resultAllocation);
         assertEquals(allocation, resultAllocation);
-        verify(allocationRepository, times(1)).getOne(allocationId);
+        verify(projectRepository, times(1)).findFirstByAllocationsId(allocationId);
     }
 
     @Test
     void shouldDeallocate_whenEmployeeIsDeallocated() {
         //Arrange
         Allocation allocation = new Allocation();
-        UUID id = allocation.getId();
-        when(allocationRepository.getOne(id)).thenReturn(allocation);
-        when(allocationRepository.save(allocation)).thenReturn(allocation);
+        allocation.setId(UUID.randomUUID());
+        Project project = new Project();
+        project.getAllocations().add(allocation);
+        when(projectRepository.findFirstByAllocationsId(allocation.getId())).thenReturn(project);
+        when(projectRepository.save(project)).thenReturn(project);
 
         //Act
-        projectService.deallocateEmployee(id);
+        projectService.deallocateEmployee(allocation.getId());
 
         //Assert
-        verify(allocationRepository, times(1)).getOne(id);
-        verify(allocationRepository, times(1)).save(allocation);
+        verify(projectRepository, times(1)).findFirstByAllocationsId(allocation.getId());
+        verify(projectRepository, times(1)).save(project);
     }
 
     @Test
     void shouldRetrieveAllocations_whenAllocationsAreRetrievedByProject() {
         //Arrange
         Allocation allocation = new Allocation();
-        when(allocationRepository.findAllByProject(project))
-                .thenReturn(Collections.singletonList(allocation).stream().collect(Collectors.toSet()));
+        Project project = new Project();
+        project.getAllocations().add(allocation);
+        when(projectRepository.getOne(project.getId()))
+                .thenReturn(project);
 
         //Act
-        Set<Allocation> resultAllocations = projectService.retrieveAllocations(project);
+        Set<Allocation> resultAllocations = projectService.retrieveAllocations(project.getId());
 
         //Assert
         assertNotNull(resultAllocations);
@@ -284,30 +276,44 @@ class ProjectServiceTest {
     void shouldAllocateEmployeeToProject_whenEmployeeIsAllocatedToProject() {
         //Arrange
         Allocation allocation = new Allocation();
-        when(allocationRepository.save(allocation)).thenReturn(allocation);
+        Employee employee = new Employee();
+        employee.setId(UUID.randomUUID());
+        employee.setEmployeeCode("emp12");
+        allocation.setId(UUID.randomUUID());
+        allocation.setEmployee(employee);
+        Project project = new Project();
+        project.getAllocations().add(allocation);
+        project.setId(UUID.randomUUID());
+        when(projectRepository.getOne(project.getId())).thenReturn(project);
+        when(projectRepository.save(project)).thenReturn(project);
 
         //Act
-        Allocation resultAllocation = projectService.allocateEmployee(allocation);
+        Allocation resultAllocation = projectService.allocateEmployee(project.getId(), allocation);
 
         //Assert
         assertNotNull(resultAllocation);
         assertEquals(allocation, resultAllocation);
-        verify(allocationRepository, times(1)).save(allocation);
+        verify(projectRepository, times(1)).getOne(project.getId());
+        verify(projectRepository, times(1)).save(project);
 
     }
 
     @Test
-    void shouldRetrieveAllocations_whenAllocationsAreRetrievedByProjectAndDeleted() {
+    void shouldRetrieveAllocations_whenAllocationsAreRetrievedByProjectId() {
         //Arrange
         Allocation allocation = new Allocation();
-        when(allocationRepository.findAllByProjectAndDeleted(any(Project.class), anyBoolean()))
-                .thenReturn(Collections.singletonList(allocation).stream().collect(Collectors.toSet()));
+        Project project = new Project();
+        project.setId(UUID.randomUUID());
+        project.getAllocations().add(allocation);
+        when(projectRepository.getOne(project.getId()))
+                .thenReturn(project);
 
         //Act
-        Set<Allocation> resultAllocations = projectService.retrieveAllocations(project, false);
+        Set<Allocation> resultAllocations = projectService.retrieveAllocations(project.getId());
 
         //Assert
         assertNotNull(resultAllocations);
         assertEquals(1, resultAllocations.size());
+        verify(projectRepository, times(1)).getOne(project.getId());
     }
 }

@@ -34,12 +34,6 @@ public abstract class BaseEntity {
     @Column(name = "created_by")
     private String createdBy;
 
-    @Column(name = "updated")
-    private LocalDateTime updated;
-
-    @Column(name = "updated_by")
-    private String updatedBy;
-
     @LastModifiedBy
     @Column(name = "last_modified_by")
     private String lastModifiedBy;
