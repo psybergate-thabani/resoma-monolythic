@@ -82,6 +82,7 @@ public class Project extends BaseEntity {
         setStartDate(project.getStartDate());
         setEndDate(project.getEndDate());
         setType(project.getType());
+        setVersion(project.getVersion());
         return this;
     }
 
