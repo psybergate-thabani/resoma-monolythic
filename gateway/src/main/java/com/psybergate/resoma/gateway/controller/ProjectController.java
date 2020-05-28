@@ -36,14 +36,14 @@ public class ProjectController {
         return ResponseEntity.ok(savedProject);
     }
 
-    @GetMapping(value = "v1/project-entries/{projectId}")
-    public ResponseEntity<Project> retrieveProject(@PathVariable UUID projectId) {
-        return ResponseEntity.ok(projectService.retrieveProject(projectId));
+    @GetMapping(value = "v1/project-entries/{projectId}", params = {"deleted"})
+    public ResponseEntity<Project> retrieveProject(@PathVariable UUID projectId, @RequestParam("deleted") boolean deleted) {
+        return ResponseEntity.ok(projectService.retrieveProject(projectId, deleted));
     }
 
     @GetMapping(value = "v1/project-entries", params = {"deleted"})
     public ResponseEntity<List<Project>> retrieveProjects(@RequestParam("deleted") Boolean deleted) {
-        return ResponseEntity.ok(projectService.retrieveProjects());
+        return ResponseEntity.ok(projectService.retrieveProjects(deleted));
     }
 
     @PutMapping("v1/project-entries/{projectId}")
@@ -56,8 +56,11 @@ public class ProjectController {
     @PutMapping(value = "v1/project-entries/{projectId}/tasks")
     public ResponseEntity<Task> addTaskToTheProject(@RequestBody TaskDTO newTask,
                                                     @PathVariable UUID projectId) {
-        Task task = buildTask(newTask);
-        return ResponseEntity.ok(projectService.addTaskToProject(task, projectId));
+
+        if (!projectId.equals(newTask.getProjectId()))
+            throw new ValidationException("Project id and projectId in taskDTO does not match.");
+
+        return ResponseEntity.ok(projectService.addTaskToProject(newTask.getTask(), projectId));
     }
 
     @GetMapping(value = "v1/project-entries/{projectId}/tasks", params = {"deleted"})
@@ -73,7 +76,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("v1/project-entries/{projectId}/tasks/{taskId}")
-    public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId, @PathVariable UUID projectId) {
+    public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId) {
         projectService.deleteTask(taskId);
         return ResponseEntity.ok().build();
     }
@@ -95,6 +98,8 @@ public class ProjectController {
 
     @PostMapping("v1/project-entries/{projectId}/allocations")
     public ResponseEntity<Allocation> allocateEmployee(@PathVariable UUID projectId, @RequestBody AllocationDTO allocationDTO) {
+        if(!projectId.equals(allocationDTO.getProjectId()))
+            throw new ValidationException("Project id and projectId in AllocationDTO does not match.");
         Allocation allocation = buildAllocation(allocationDTO);
         return ResponseEntity.ok(projectService.allocateEmployee(projectId, allocation));
     }
@@ -105,14 +110,14 @@ public class ProjectController {
     }
 
     @DeleteMapping("v1/project-entries/{projectId}/allocations/{allocationId}")
-    public ResponseEntity<Void> deallocateEmployee(@PathVariable UUID projectId, @PathVariable UUID allocationId) {
+    public ResponseEntity<Void> deallocateEmployee(@PathVariable UUID allocationId) {
         projectService.deallocateEmployee(allocationId);
         return ResponseEntity.ok().build();
     }
 
     private Allocation buildAllocation(AllocationDTO allocationDTO) {
         Employee employee = employeeService.retrieveEmployee(allocationDTO.getEmployeeId());
-        Project project = projectService.retrieveProject(allocationDTO.getProjectId());
+        Project project = projectService.retrieveProject(allocationDTO.getProjectId(), false);
         if (Objects.isNull(employee))
             throw new ValidationException("Employee with id \"" + allocationDTO.getEmployeeId() + "\" does not exist");
         if (Objects.isNull(project))
@@ -120,8 +125,4 @@ public class ProjectController {
         return new Allocation(employee);
     }
 
-    private Task buildTask(TaskDTO taskDTO) {
-        Task task = taskDTO.getTask();
-        return task;
-    }
 }

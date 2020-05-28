@@ -1,6 +1,5 @@
 package com.psybergate.resoma.project.service;
 
-
 import com.psybergate.resoma.project.entity.Allocation;
 import com.psybergate.resoma.project.entity.Project;
 import com.psybergate.resoma.project.entity.Task;
@@ -13,9 +12,9 @@ public interface ProjectService {
 
     Project captureProject(Project newProject);
 
-    Project retrieveProject(UUID id);
+    Project retrieveProject(UUID id, boolean deleted);
 
-    List<Project> retrieveProjects();
+    List<Project> retrieveProjects(boolean deleted);
 
     Project updateProject(Project project);
 

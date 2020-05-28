@@ -5,11 +5,9 @@ import com.psybergate.resoma.project.entity.Allocation;
 import com.psybergate.resoma.project.entity.Project;
 import com.psybergate.resoma.project.entity.Task;
 import com.psybergate.resoma.project.repository.ProjectRepository;
-import org.hibernate.service.UnknownServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.lang.model.UnknownEntityException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
@@ -36,14 +34,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project retrieveProject(UUID id) {
-        return projectRepository.findByIdAndDeleted(id, false);
+    public Project retrieveProject(UUID id, boolean deleted) {
+        return projectRepository.findByIdAndDeleted(id, deleted);
     }
 
     @Override
     @Transactional
-    public List<Project> retrieveProjects() {
-        return projectRepository.findAllByDeleted(false);
+    public List<Project> retrieveProjects(boolean deleted) {
+        return projectRepository.findAllByDeleted(deleted);
     }
 
     @Override
@@ -57,8 +55,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void deleteProject(UUID id) {
-        Project project = projectRepository.getOne(id);
-        checkNull(project == null, "Project does not exist");
+        Project project = retrieveProject(id, false);
+        if (Objects.isNull(project))
+            throw new ValidationException("Project does not exist");
+
         project.setDeleted(true);
         projectRepository.save(project);
     }
@@ -66,20 +66,24 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public Task addTaskToProject(@Valid Task newTask, UUID projectId) {
-        Project project = projectRepository.getOne(projectId);
+        Project project = projectRepository.findByIdAndDeleted(projectId, false);
+        if(Objects.isNull(project))
+                throw new ValidationException("Project with id \"" + projectId + "\" does not exist");
         project.addTask(newTask);
         project = projectRepository.save(project);
-        for (Task task: project.getTasks()) {
-            if(task.getCode().equals(newTask.getCode()))
-                return task;
+        for (Task task : project.getTasks()) {
+            if (task.getCode().equals(newTask.getCode())) {
+                newTask = task;
+                break;
+            }
         }
-        throw new IllegalArgumentException();
+        return newTask;
     }
 
     @Override
     @Transactional
     public Set<Task> retrieveTasks(@Valid UUID projectId, boolean deleted) {
-        Project project = projectRepository.getOne(projectId);
+        Project project = projectRepository.findByIdAndDeleted(projectId, deleted);
         Set<Task> tasks = project.getTasks().stream().filter(task -> task.isDeleted() == deleted)
                 .collect(Collectors.toSet());
         return tasks;
@@ -95,7 +99,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Task retrieveTask(UUID taskId) {
-        Project project =  projectRepository.findFirstByTasks_id(taskId);
+        Project project = projectRepository.findFirstByTasks_id(taskId);
         return project.getTask(taskId);
     }
 

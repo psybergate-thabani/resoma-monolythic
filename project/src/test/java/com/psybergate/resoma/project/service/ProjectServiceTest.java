@@ -7,12 +7,14 @@ import com.psybergate.resoma.project.entity.Project;
 import com.psybergate.resoma.project.entity.ProjectType;
 import com.psybergate.resoma.project.entity.Task;
 import com.psybergate.resoma.project.repository.ProjectRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -57,7 +59,7 @@ class ProjectServiceTest {
         when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
 
         //Act
-        Project resultProject = projectService.retrieveProject(id);
+        Project resultProject = projectService.retrieveProject(id, false);
 
         //Assert
         assertNotNull(resultProject);
@@ -74,7 +76,7 @@ class ProjectServiceTest {
         when(projectRepository.findAllByDeleted(false)).thenReturn(projects);
 
         //Act
-        List<Project> resultProjects = projectService.retrieveProjects();
+        List<Project> resultProjects = projectService.retrieveProjects(false);
 
         //Assert
         assertEquals(3, resultProjects.size());
@@ -104,17 +106,29 @@ class ProjectServiceTest {
         Task task = new Task("task1", "First Task", false);
         Project project = new Project();
         project.getTasks().add(task);
-        when(projectRepository.getOne(id)).thenReturn(project);
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
 
         //Act
         projectService.deleteProject(id);
 
         //Assert
-        verify(projectRepository, times(1)).getOne(id);
+        verify(projectRepository, times(1)).findByIdAndDeleted(id, false);
         verify(projectRepository, times(1)).save(project);
         assertTrue(project.isDeleted());
         assertTrue(task.isDeleted());
+    }
+
+    @Test
+    void shouldThrowValidationException_whenProjectIsDeletedAndProjectDoesNotExist() {
+        //Arrange
+        UUID id = project.getId();
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(null);
+
+        //Act
+        Assertions.assertThrows(ValidationException.class, () -> {
+            projectService.deleteProject(id);
+        });
     }
 
     @Test
@@ -122,19 +136,32 @@ class ProjectServiceTest {
         //Arrange
         Task task = new Task("task1", "First Task", false);
         UUID id = project.getId();
-        System.out.println(project);
-        when(projectRepository.getOne(any(UUID.class))).thenReturn(project);
+
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(project);
         when(projectRepository.save(any(Project.class))).thenReturn(project);
 
         //Act
         Task resultTask = projectService.addTaskToProject(task, id);
-        System.out.println(resultTask);
+
         //Assert
         assertNotNull(resultTask);
         assertEquals(task, resultTask);
-        verify(projectRepository, times(1)).getOne(id);
+        verify(projectRepository, times(1)).findByIdAndDeleted(id, false);
         verify(projectRepository, times(1)).save(any(Project.class));
 
+    }
+
+    @Test
+    void shouldThrowValidationException_whenTaskIsAddedToProjectThatDoesNotExist() {
+        //Arrange
+        Task task = new Task("task1", "First Task", false);
+        UUID id = project.getId();
+        when(projectRepository.findByIdAndDeleted(id, false)).thenReturn(null);
+
+        //Act And Assert
+        Assertions.assertThrows(ValidationException.class, () -> {
+            Task resultTask = projectService.addTaskToProject(task, id);
+        });
     }
 
     @Test
@@ -143,8 +170,7 @@ class ProjectServiceTest {
         Task task = new Task("task1", "First Task", false);
         Project project = new Project();
         project.getTasks().add(task);
-        when(projectRepository.getOne(project.getId()))
-                .thenReturn(project);
+        when(projectRepository.findByIdAndDeleted(project.getId(),false)).thenReturn(project);
 
         //Act
         Set<Task> resultTasks = projectService.retrieveTasks(project.getId(), false);
